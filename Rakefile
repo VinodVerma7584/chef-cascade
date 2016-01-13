@@ -60,6 +60,8 @@ end
 
 desc 'build debian package'
 task :deb => [:install_deps, :clean, :setup_dir, :copy_build_files] do
+  ENV.delete('GEM_HOME')
+  ENV.delete('GEM_PATH')
   sh %{ fpm -t deb -s dir -n #{NAME} -v #{Cascade::VERSION} -a all --iteration #{ITERATION} -d chef --deb-user root --deb-group root -C ./build -p ./pkg . }
 end
 

@@ -29,7 +29,7 @@ $:.unshift '/opt/chef-cascade/lib'
 
 require 'chef/application/cascade'
 
-# Do not all packages to restart runit services
+# Do not allow packages to restart runit services
 ENV['SV_NOOP'] = 'true'
 
 Chef::Application::Cascade.new.run
