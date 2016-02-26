@@ -143,10 +143,17 @@ class Chef::Application::Cascade < Chef::Application
     :description  => "Set maximum duration to wait for another client run to finish, default is indefinitely.",
     :proc         => lambda { |s| s.to_i }
 
-  option :skip_packages,
+  option :skip_meta,
     :short        => "-s",
     :long         => "--skip-metadata-update",
     :description  => "Skip package metadata update",
+    :boolean      => true,
+    :default      => false
+
+  option :skip_package,
+    :short        => "-S",
+    :long         => "--skip-package-install",
+    :description  => "Skip package install",
     :boolean      => true,
     :default      => false
 
@@ -205,7 +212,7 @@ class Chef::Application::Cascade < Chef::Application
     end
 
     # Update package metadata
-    if Chef::Config[:skip_packages] == false
+    if Chef::Config[:skip_meta] == false
       event = Hashie::Mash.new(
         name: 'cascade.cm',
         source: @hostname,
@@ -224,12 +231,14 @@ class Chef::Application::Cascade < Chef::Application
     end
 
     # Install updated packages
-    if Chef::Config[:packages] and supported? 
-      yum_packages if @pm_flavor == :yum
+    if Chef::Config[:packages] && Chef::Config[:skip_package] == false
+      if supported? 
+        yum_packages if @pm_flavor == :yum
         
-      apt_packages if @pm_flavor == :apt
-    else
-      Chef::Log.error "Package installs only supported on Linux via (apt/yum)"
+        apt_packages if @pm_flavor == :apt
+      else
+        Chef::Log.error "Package installs only supported on Linux via (apt/yum)"
+      end
     end
   end
 
